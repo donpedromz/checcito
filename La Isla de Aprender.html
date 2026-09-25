@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Isla de Aprender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ocean-deep:#0B6E91;
+    --ocean-mid:#1690B8;
+    --ocean-light:#5FCBE0;
+    --sand:#F7DA9B;
+    --sand-dark:#E3B96B;
+    --ink:#173A52;
+    --cream:#FFF8EC;
+    --white:#FFFFFF;
+    --coral:#FF6F59;
+    --coral-dark:#D9503C;
+    --violet:#8E7DBE;
+    --violet-dark:#6E5A9E;
+    --leaf:#4FA972;
+    --leaf-dark:#357C51;
+    --sunset:#F2A65A;
+    --sunset-dark:#D6822F;
+    --cherry:#E4572E;
+    --cherry-dark:#B93F1D;
+    --safe-t:env(safe-area-inset-top,0px);
+    --safe-b:env(safe-area-inset-bottom,0px);
+    box-sizing:border-box;
+  }
+  *,*::before,*::after{box-sizing:inherit;}
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:'Nunito',sans-serif;
+    background:radial-gradient(ellipse at 50% -10%, var(--ocean-mid), var(--ocean-deep) 70%);
+    color:var(--ink);
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior:none;
+  }
+  h1,h2,h3,.display{font-family:'Baloo 2',cursive;}
+  #app{
+    position:relative;
+    min-height:100%;
+    padding-top:calc(var(--safe-t) + 10px);
+    padding-bottom:calc(var(--safe-b) + 10px);
+    overflow-x:hidden;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  button:focus-visible, [tabindex]:focus-visible{outline:3px solid #fff; outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+  }
+
+  /* ---------- MAP SCREEN ---------- */
+  .map-wrap{max-width:760px;margin:0 auto;padding:0 16px;text-align:center;}
+  .map-title{color:var(--cream);font-size:clamp(28px,7vw,42px);margin:6px 0 2px;text-shadow:0 3px 0 rgba(0,0,0,.15);}
+  .map-sub{color:#EAF7FB;font-size:15px;margin:0 0 8px;opacity:.9;}
+  .mascot{
+    font-size:56px;display:inline-block;
+    animation:bob 2.4s ease-in-out infinite;
+    filter:drop-shadow(0 6px 6px rgba(0,0,0,.25));
+  }
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-10px) rotate(3deg);}}
+  .archipelago{
+    position:relative;
+    height:min(78vh, 620px);
+    min-height:420px;
+    margin-top:6px;
+  }
+  .wave-layer{position:absolute;inset:0;border-radius:28px;overflow:hidden;background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0) 40%);}
+  .island-btn{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    width:120px;
+  }
+  .island-blob{
+    width:92px;height:92px;border-radius:46% 54% 58% 42%/50% 46% 54% 50%;
+    display:flex;align-items:center;justify-content:center;font-size:38px;
+    box-shadow:0 8px 0 rgba(0,0,0,.18), 0 10px 18px rgba(0,0,0,.25);
+    border:4px solid rgba(255,255,255,.55);
+    transition:transform .15s ease;
+  }
+  .island-btn:active .island-blob{transform:scale(.92);}
+  .island-name{color:var(--cream);font-weight:800;font-size:13px;line-height:1.15;text-shadow:0 2px 0 rgba(0,0,0,.2);}
+  .island-stars{font-size:13px;letter-spacing:2px;}
+  .star-on{color:#FFD65C;text-shadow:0 1px 0 rgba(0,0,0,.2);}
+  .star-off{color:rgba(255,255,255,.35);}
+  .isl-1 .island-blob{background:var(--coral);}
+  .isl-2 .island-blob{background:var(--violet);}
+  .isl-3 .island-blob{background:var(--leaf);}
+  .isl-4 .island-blob{background:var(--sunset);}
+  .isl-5 .island-blob{background:var(--cherry);}
+
+  /* ---------- CARD / PANEL ---------- */
+  .panel{
+    max-width:560px;margin:24px auto;background:var(--cream);
+    border-radius:26px;padding:26px 22px;box-shadow:0 14px 0 rgba(0,0,0,.15);
+    text-align:center;
+  }
+  .panel .icon-badge{
+    width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:40px;margin:0 auto 10px;color:#fff;border:5px solid rgba(255,255,255,.7);
+  }
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:14px 26px;border-radius:999px;font-weight:800;font-size:17px;
+    box-shadow:0 6px 0 rgba(0,0,0,.2);
+    color:#fff;transition:transform .1s ease;
+  }
+  .btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.2);}
+  .btn-primary{background:var(--leaf);}
+  .btn-secondary{background:var(--ocean-mid);}
+  .btn-listen{background:var(--sunset);}
+  .btn-ghost{background:rgba(0,0,0,.06);color:var(--ink);box-shadow:none;}
+  .btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+
+  .topbar{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 16px;}
+  .back-btn{color:var(--cream);font-weight:800;font-size:15px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.15);}
+  .hearts{font-size:20px;letter-spacing:3px;}
+  .stage-title{color:var(--cream);text-align:center;font-size:22px;margin:4px 0 12px;}
+
+  /* ---------- GAME GENERIC ---------- */
+  .game-wrap{max-width:720px;margin:0 auto;padding:0 14px 40px;}
+  .grid{display:grid;gap:12px;}
+  .tile{
+    background:var(--white);border-radius:16px;padding:14px 8px;font-size:15px;font-weight:800;
+    box-shadow:0 5px 0 rgba(0,0,0,.12);display:flex;flex-direction:column;align-items:center;gap:6px;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .tile:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.12);}
+  .tile.selected{outline:4px solid var(--sunset);}
+  .tile.matched{opacity:.35;pointer-events:none;}
+  .tile .emoji{font-size:34px;}
+  .shake{animation:shake .35s;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+  /* palabras */
+  .cols{display:flex;gap:16px;}
+  .col{flex:1;display:flex;flex-direction:column;gap:10px;}
+
+  /* ropero */
+  .weather-banner{background:rgba(255,255,255,.15);color:var(--cream);border-radius:16px;padding:10px 14px;text-align:center;font-weight:800;margin-bottom:14px;font-size:18px;}
+  .avatar-zone{
+    position:relative;height:190px;background:rgba(255,255,255,.12);border-radius:20px;
+    display:flex;align-items:center;justify-content:center;margin-bottom:16px;border:3px dashed rgba(255,255,255,.4);
+  }
+  .avatar-zone.drag-over{background:rgba(255,255,255,.28);}
+  .avatar{font-size:82px;}
+  .worn-items{position:absolute;top:6px;left:6px;right:6px;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;}
+  .worn-items span{font-size:26px;}
+  .closet{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+  .cloth{
+    width:64px;height:64px;background:var(--white);border-radius:16px;display:flex;align-items:center;justify-content:center;
+    font-size:30px;box-shadow:0 5px 0 rgba(0,0,0,.12);touch-action:none;user-select:none;
+  }
+  .cloth.dragging{opacity:.5;}
+
+  /* cajas */
+  .boxes{display:flex;gap:12px;margin-bottom:18px;}
+  .box{
+    flex:1;min-height:130px;background:rgba(255,255,255,.14);border:3px dashed rgba(255,255,255,.5);
+    border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+    padding:10px 6px;gap:6px;color:var(--cream);font-weight:800;font-size:13px;
+  }
+  .box.drag-over{background:rgba(255,255,255,.3);}
+  .box .placed{font-size:22px;}
+  .items-tray{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+  .item-chip{
+    width:58px;height:58px;background:var(--white);border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:28px;box-shadow:0 5px 0 rgba(0,0,0,.12);touch-action:none;user-select:none;
+  }
+
+  /* memoria */
+  .mem-grid{display:grid;gap:10px;}
+  .mem-card{
+    aspect-ratio:1/1;background:var(--ocean-mid);border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:30px;box-shadow:0 5px 0 rgba(0,0,0,.18);color:transparent;transition:transform .15s ease, background .15s ease;
+  }
+  .mem-card.flipped, .mem-card.matched{background:var(--white);color:inherit;}
+  .mem-card.matched{opacity:.5;}
+
+  /* cocina */
+  .recipe-track{display:flex;gap:8px;justify-content:center;margin-bottom:14px;flex-wrap:wrap;}
+  .recipe-track .slot{
+    width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+  }
+  .recipe-track .slot.filled{background:var(--white);}
+  .plate{
+    background:rgba(255,255,255,.12);border-radius:20px;padding:14px;margin-bottom:16px;text-align:center;color:var(--cream);
+  }
+  .tray-title{color:var(--cream);font-weight:800;text-align:center;margin:8px 0;}
+
+  /* toast */
+  .toast{
+    position:fixed;left:50%;top:16px;transform:translateX(-50%);
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-weight:800;
+    box-shadow:0 8px 20px rgba(0,0,0,.3);z-index:50;opacity:0;transition:opacity .2s ease, top .2s ease;
+    top:calc(var(--safe-t) + 6px);
+  }
+  .toast.show{opacity:1;}
+
+  /* fx */
+  #fx-canvas{position:fixed;inset:0;pointer-events:none;z-index:40;width:100%;height:100%;}
+  .clap-emoji{position:fixed;pointer-events:none;z-index:41;font-size:30px;left:0;top:0;animation:floatUp 1.3s ease-out forwards;}
+  @keyframes floatUp{0%{transform:translateY(0) scale(.6) rotate(0deg);opacity:0;}15%{opacity:1;transform:translateY(-10px) scale(1.1) rotate(-8deg);}100%{transform:translateY(-160px) scale(1) rotate(8deg);opacity:0;}}
+
+  @media (max-width:420px){
+    .items-tray, .closet{gap:8px;}
+    .item-chip, .cloth{width:52px;height:52px;font-size:24px;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+<canvas id="fx-canvas"></canvas>
+<script>
+(function(){
+  "use strict";
+
+  /* ================= STORAGE ================= */
+  var STORAGE_KEY = 'isla-aprender-progress-v1';
+  function loadProgress(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return {palabras:0, ropero:0, cajas:0, memoria:0, cocina:0};
+  }
+  function saveProgress(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.stars)); }catch(e){}
+  }
+
+  var state = {
+    screen:'map',
+    current:null,
+    stars: loadProgress()
+  };
+
+  var ISLANDS = [
+    {key:'palabras', name:'Isla de las Palabras', emoji:'🔤', cls:'isl-1',
+      desc:'Aquí vas a escuchar palabras nuevas y a descubrir a qué dibujo pertenecen. ¡Toca una palabra para escucharla y luego busca su dibujo!',
+      pos:{top:'20%', left:'22%'}},
+    {key:'ropero', name:'Ropero Mágico', emoji:'👕', cls:'isl-2',
+      desc:'En esta isla vas a vestir a tu amigo con la ropa correcta según el clima del día. ¡Sol, lluvia o frío, tú decides qué ponerle!',
+      pos:{top:'14%', left:'62%'}},
+    {key:'cajas', name:'Isla de las Cajas', emoji:'📦', cls:'isl-3',
+      desc:'Aquí vas a guardar cada cosa en la caja que le corresponde. No hay tiempo límite, ¡puedes pensar con calma!',
+      pos:{top:'46%', left:'50%'}},
+    {key:'memoria', name:'Isla de la Memoria', emoji:'🧠', cls:'isl-4',
+      desc:'Vas a voltear cartas y encontrar las parejas iguales. Cada vez que encuentres una pareja, ¡tu memoria se hace más fuerte!',
+      pos:{top:'70%', left:'26%'}},
+    {key:'cocina', name:'Isla de la Cocina', emoji:'🍳', cls:'isl-5',
+      desc:'Vas a preparar comidas ricas siguiendo el orden correcto de los ingredientes. Si te equivocas no pasa nada, ¡puedes volver a intentarlo!',
+      pos:{top:'66%', left:'74%'}}
+  ];
+
+  function islandByKey(k){
+    for(var i=0;i<ISLANDS.length;i++) if(ISLANDS[i].key===k) return ISLANDS[i];
+    return null;
+  }
+
+  /* ================= AUDIO ================= */
+  var audioCtx = null;
+  function getAudioCtx(){
+    try{
+      if(!audioCtx){
+        var AC = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AC();
+      }
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }catch(e){ return null; }
+  }
+
+  function burstNoise(ctx, t, intense){
+    var len = Math.floor(ctx.sampleRate * 0.05);
+    var buffer = ctx.createBuffer(1, len, ctx.sampleRate);
+    var data = buffer.getChannelData(0);
+    for(var i=0;i<len;i++){
+      data[i] = (Math.random()*2-1) * Math.pow(1-i/len, 2);
+    }
+    var src = ctx.createBufferSource();
+    src.buffer = buffer;
+    var filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1200 + Math.random()*1800;
+    var gain = ctx.createGain();
+    gain.gain.value = (intense ? 0.5 : 0.28) * (0.6 + Math.random()*0.4);
+    src.connect(filter).connect(gain).connect(ctx.destination);
+    src.start(t);
+  }
+
+  function playApplause(big){
+    var ctx = getAudioCtx();
+    if(!ctx) return;
+    var now = ctx.currentTime;
+    var count = big ? 16 : 4;
+    var span = big ? 0.9 : 0.28;
+    for(var i=0;i<count;i++){
+      burstNoise(ctx, now + Math.random()*span, big);
+    }
+  }
+
+  function playJingle(){
+    var ctx = getAudioCtx();
+    if(!ctx) return;
+    var notes = [523.25, 659.25, 783.99, 1046.5];
+    var t = ctx.currentTime + 0.75;
+    notes.forEach(function(f){
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.3, t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t+0.32);
+      osc.connect(g).connect(ctx.destination);
+      osc.start(t); osc.stop(t+0.34);
+      t += 0.16;
+    });
+  }
+
+  function speak(text){
+    try{
+      if(!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'es-ES';
+      u.rate = 0.92;
+      u.pitch = 1.05;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  /* ================= FX: confetti + claps ================= */
+  var canvas = document.getElementById('fx-canvas');
+  var ctx2d = canvas.getContext('2d');
+  var particles = [];
+  function resizeCanvas(){
+    canvas.width = window.innerWidth * devicePixelRatio;
+    canvas.height = window.innerHeight * devicePixelRatio;
+    canvas.style.width = window.innerWidth+'px';
+    canvas.style.height = window.innerHeight+'px';
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  var CONFETTI_COLORS = ['#FF6F59','#8E7DBE','#4FA972','#F2A65A','#E4572E','#5FCBE0','#FFD65C'];
+
+  function spawnConfetti(cx, cy, count){
+    for(var i=0;i<count;i++){
+      particles.push({
+        x: cx, y: cy,
+        vx: (Math.random()-0.5) * 8,
+        vy: -(Math.random()*7 + 3),
+        g: 0.22,
+        rot: Math.random()*Math.PI*2,
+        vr: (Math.random()-0.5)*0.3,
+        size: 5 + Math.random()*5,
+        color: CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)],
+        life: 70 + Math.random()*30
+      });
+    }
+  }
+
+  function tick(){
+    ctx2d.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    ctx2d.clearRect(0,0,window.innerWidth, window.innerHeight);
+    for(var i=particles.length-1;i>=0;i--){
+      var p = particles[i];
+      p.vy += p.g;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      p.life -= 1;
+      if(p.life<=0 || p.y > window.innerHeight+40){ particles.splice(i,1); continue; }
+      ctx2d.save();
+      ctx2d.translate(p.x, p.y);
+      ctx2d.rotate(p.rot);
+      ctx2d.fillStyle = p.color;
+      ctx2d.globalAlpha = Math.min(1, p.life/25);
+      ctx2d.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+      ctx2d.restore();
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  function spawnClaps(n){
+    for(var i=0;i<n;i++){
+      (function(delay){
+        setTimeout(function(){
+          var el = document.createElement('div');
+          el.className = 'clap-emoji';
+          el.textContent = '👏';
+          var x = Math.random()*(window.innerWidth-40)+10;
+          var y = window.innerHeight - 80 - Math.random()*80;
+          el.style.left = x+'px';
+          el.style.top = y+'px';
+          document.body.appendChild(el);
+          setTimeout(function(){ el.remove(); }, 1400);
+        }, delay);
+      })(i*80);
+    }
+  }
+
+  function celebrate(big, atX, atY){
+    var x = atX!=null ? atX : window.innerWidth/2;
+    var y = atY!=null ? atY : window.innerHeight/2;
+    spawnConfetti(x, y, big ? 90 : 22);
+    playApplause(big);
+    if(big){
+      spawnClaps(7);
+      setTimeout(playJingle, 700);
+      showToast('¡Lograste! 🎉');
+    }
+  }
+
+  var toastTimer = null;
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 1800);
+  }
+
+  /* ================= DRAG HELPER (pointer events) ================= */
+  function makeDraggable(el, onDrop){
+    el.style.touchAction = 'none';
+    el.addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      var startX = e.clientX, startY = e.clientY;
+      var rect = el.getBoundingClientRect();
+      var clone = el.cloneNode(true);
+      clone.style.position='fixed';
+      clone.style.left = rect.left+'px';
+      clone.style.top = rect.top+'px';
+      clone.style.width = rect.width+'px';
+      clone.style.height = rect.height+'px';
+      clone.style.margin = '0';
+      clone.style.zIndex = 60;
+      clone.style.pointerEvents='none';
+      clone.style.transform='scale(1.08)';
+      clone.style.opacity='0.95';
+      document.body.appendChild(clone);
+      el.classList.add('dragging');
+
+      function move(ev){
+        var dx = ev.clientX - startX;
+        var dy = ev.clientY - startY;
+        clone.style.left = (rect.left+dx)+'px';
+        clone.style.top = (rect.top+dy)+'px';
+        var target = document.elementFromPoint(ev.clientX, ev.clientY);
+        document.querySelectorAll('.dropzone').forEach(function(z){ z.classList.remove('drag-over'); });
+        if(target){
+          var zone = target.closest('.dropzone');
+          if(zone) zone.classList.add('drag-over');
+        }
+      }
+      function up(ev){
+        document.removeEventListener('pointermove', move);
+        document.removeEventListener('pointerup', up);
+        clone.remove();
+        el.classList.remove('dragging');
+        document.querySelectorAll('.dropzone').forEach(function(z){ z.classList.remove('drag-over'); });
+        var target = document.elementFromPoint(ev.clientX, ev.clientY);
+        var zone = target ? target.closest('.dropzone') : null;
+        onDrop(zone, ev.clientX, ev.clientY);
+      }
+      document.addEventListener('pointermove', move);
+      document.addEventListener('pointerup', up);
+    });
+  }
+
+  /* ================= RENDER ROOT ================= */
+  var app = document.getElementById('app');
+
+  function render(){
+    app.innerHTML = '';
+    if(state.screen==='map') app.appendChild(renderMap());
+    else if(state.screen==='intro') app.appendChild(renderIntro());
+    else if(state.screen==='game') app.appendChild(renderGameHost());
+  }
+
+  /* ---------- MAP ---------- */
+  function renderMap(){
+    var wrap = document.createElement('div');
+    wrap.className = 'map-wrap';
+    wrap.innerHTML =
+      '<div class="mascot">🦜</div>' +
+      '<h1 class="map-title">La Isla de Aprender</h1>' +
+      '<p class="map-sub">¡Hola! Soy Coco. Elige una isla para empezar a jugar.</p>' +
+      '<div class="archipelago"><div class="wave-layer"></div></div>';
+    var archipelago = wrap.querySelector('.archipelago');
+    ISLANDS.forEach(function(isl){
+      var btn = document.createElement('button');
+      btn.className = 'island-btn ' + isl.cls;
+      btn.style.top = isl.pos.top;
+      btn.style.left = isl.pos.left;
+      btn.setAttribute('data-action','open-intro');
+      btn.setAttribute('data-island', isl.key);
+      var stars = state.stars[isl.key] || 0;
+      var starsHtml = '';
+      for(var s=1;s<=3;s++) starsHtml += '<span class="'+(s<=stars?'star-on':'star-off')+'">★</span>';
+      btn.innerHTML =
+        '<span class="island-blob">'+isl.emoji+'</span>' +
+        '<span class="island-name">'+isl.name+'</span>' +
+        '<span class="island-stars">'+starsHtml+'</span>';
+      archipelago.appendChild(btn);
+    });
+    return wrap;
+  }
+
+  /* ---------- INTRO ---------- */
+  function renderIntro(){
+    var isl = islandByKey(state.current);
+    var wrap = document.createElement('div');
+    var badgeColor = getComputedStyle(document.documentElement).getPropertyValue('--coral');
+    wrap.innerHTML =
+      '<div class="topbar"><button class="back-btn" data-action="go-map">← Mapa</button><span></span></div>' +
+      '<div class="panel">' +
+        '<div class="icon-badge" style="background:var('+cssVarFor(isl)+')">'+isl.emoji+'</div>' +
+        '<h2>'+isl.name+'</h2>' +
+        '<p>'+isl.desc+'</p>' +
+        '<div class="btn-row">' +
+          '<button class="btn btn-listen" data-action="listen-intro">🔊 Escuchar</button>' +
+          '<button class="btn btn-primary" data-action="start-game">¡Jugar! 🚀</button>' +
+        '</div>' +
+      '</div>';
+    return wrap;
+  }
+  function cssVarFor(isl){
+    var map = {palabras:'--coral', ropero:'--violet', cajas:'--leaf', memoria:'--sunset', cocina:'--cherry'};
+    return map[isl.key];
+  }
+
+  /* ---------- GAME HOST ---------- */
+  function renderGameHost(){
+    var isl = islandByKey(state.current);
+    var wrap = document.createElement('div');
+    wrap.innerHTML =
+      '<div class="topbar"><button class="back-btn" data-action="go-map">← Mapa</button><span id="game-status"></span></div>' +
+      '<h2 class="stage-title">'+isl.emoji+' '+isl.name+'</h2>' +
+      '<div class="game-wrap" id="game-stage"></div>';
+    setTimeout(function(){ startGame(isl.key); }, 0);
+    return wrap;
+  }
+
+  function finishIsland(key, starsEarned){
+    state.stars[key] = Math.max(state.stars[key]||0, starsEarned);
+    saveProgress();
+    celebrate(true);
+    setTimeout(function(){
+      state.screen = 'map';
+      state.current = null;
+      render();
+    }, 1800);
+  }
+
+  /* ================= EVENT DELEGATION ================= */
+  document.addEventListener('click', function(e){
+    var actEl = e.target.closest('[data-action]');
+    if(!actEl) return;
+    var action = actEl.getAttribute('data-action');
+
+    if(action==='open-intro'){
+      state.current = actEl.getAttribute('data-island');
+      state.screen = 'intro';
+      render();
+    } else if(action==='go-map'){
+      window.speechSynthesis && window.speechSynthesis.cancel();
+      state.screen = 'map';
+      state.current = null;
+      render();
+    } else if(action==='listen-intro'){
+      var isl = islandByKey(state.current);
+      speak(isl.desc);
+    } else if(action==='start-game'){
+      state.screen = 'game';
+      render();
+    } else if(action==='word-pick'){
+      Palabras.pickWord(actEl);
+    } else if(action==='image-pick'){
+      Palabras.pickImage(actEl);
+    } else if(action==='mem-flip'){
+      Memoria.flip(actEl);
+    } else if(action==='recipe-pick'){
+      Cocina.pick(actEl);
+    }
+  });
+
+  function startGame(key){
+    if(key==='palabras') Palabras.start();
+    else if(key==='ropero') Ropero.start();
+    else if(key==='cajas') Cajas.start();
+    else if(key==='memoria') Memoria.start();
+    else if(key==='cocina') Cocina.start();
+  }
+
+  function setStatus(html){
+    var el = document.getElementById('game-status');
+    if(el) el.innerHTML = html;
+  }
+
+  /* ================= GAME 1: PALABRAS ================= */
+  var Palabras = (function(){
+    var POOL = [
+      {word:'Sol', emoji:'☀️'}, {word:'Luna', emoji:'🌙'}, {word:'Casa', emoji:'🏠'},
+      {word:'Perro', emoji:'🐶'}, {word:'Gato', emoji:'🐱'}, {word:'Flor', emoji:'🌸'},
+      {word:'Árbol', emoji:'🌳'}, {word:'Pelota', emoji:'⚽'}, {word:'Pez', emoji:'🐟'},
+      {word:'Estrella', emoji:'⭐'}
+    ];
+    var round, selectedWord, mistakes;
+
+    function shuffle(arr){ return arr.map(function(v){return [Math.random(),v];}).sort(function(a,b){return a[0]-b[0];}).map(function(v){return v[1];}); }
+
+    function start(){
+      round = shuffle(POOL).slice(0,6);
+      selectedWord = null;
+      mistakes = 0;
+      draw();
+    }
+
+    function draw(){
+      var words = shuffle(round.slice());
+      var images = shuffle(round.slice());
+      var stage = document.getElementById('game-stage');
+      stage.innerHTML =
+        '<p style="color:var(--cream);text-align:center;font-weight:800;">Toca una palabra para escucharla, luego toca su dibujo.</p>' +
+        '<div class="cols"><div class="col" id="col-words"></div><div class="col" id="col-images"></div></div>';
+      var colW = stage.querySelector('#col-words');
+      var colI = stage.querySelector('#col-images');
+      words.forEach(function(item){
+        var t = document.createElement('button');
+        t.className='tile'; t.setAttribute('data-action','word-pick'); t.setAttribute('data-word', item.word);
+        t.innerHTML = '<span>'+item.word+'</span>';
+        if(item.solved) t.classList.add('matched');
+        colW.appendChild(t);
+      });
+      images.forEach(function(item){
+        var t = document.createElement('button');
+        t.className='tile'; t.setAttribute('data-action','image-pick'); t.setAttribute('data-word', item.word);
+        t.innerHTML = '<span class="emoji">'+item.emoji+'</span>';
+        if(item.solved) t.classList.add('matched');
+        colI.appendChild(t);
+      });
+      setStatus('');
+    }
+
+    function pickWord(el){
+      if(el.classList.contains('matched')) return;
+      document.querySelectorAll('#col-words .tile').forEach(function(t){t.classList.remove('selected');});
+      el.classList.add('selected');
+      selectedWord = el.getAttribute('data-word');
+      speak(selectedWord);
+    }
+
+    function pickImage(el){
+      if(el.classList.contains('matched') || !selectedWord) return;
+      var word = el.getAttribute('data-word');
+      if(word === selectedWord){
+        el.classList.add('matched');
+        document.querySelectorAll('#col-words .tile[data-word="'+cssEscape(word)+'"]').forEach(function(t){t.classList.add('matched');});
+        round.forEach(function(it){ if(it.word===word) it.solved = true; });
+        var rect = el.getBoundingClientRect();
+        celebrate(false, rect.left+rect.width/2, rect.top+rect.height/2);
+        selectedWord = null;
+        if(round.every(function(it){return it.solved;})){
+          var stars = mistakes<=1 ? 3 : (mistakes<=3 ? 2 : 1);
+          setTimeout(function(){ finishIsland('palabras', stars); }, 400);
+        }
+      } else {
+        mistakes++;
+        el.classList.add('shake');
+        setTimeout(function(){ el.classList.remove('shake'); }, 350);
+      }
+    }
+    function cssEscape(s){ return s.replace(/["\\]/g, '\\$&'); }
+
+    return {start:start, pickWord:pickWord, pickImage:pickImage};
+  })();
+
+  /* ================= GAME 2: ROPERO MÁGICO ================= */
+  var Ropero = (function(){
+    var WEATHERS = [
+      {key:'sol', label:'Hoy hace sol ☀️', need:['gorra','camiseta','short'], icon:'☀️'},
+      {key:'lluvia', label:'Hoy está lloviendo 🌧️', need:['impermeable','botas','paraguas'], icon:'🌧️'},
+      {key:'frio', label:'Hoy hace mucho frío ❄️', need:['abrigo','bufanda','gorro'], icon:'❄️'}
+    ];
+    var CLOTHES = {
+      gorra:'🧢', camiseta:'👕', short:'🩳',
+      impermeable:'🧥', botas:'👢', paraguas:'☂️',
+      abrigo:'🧥', bufanda:'🧣', gorro:'🎩',
+      sandalias:'👡', guantes:'🧤', chaleco:'🦺'
+    };
+    var DISTRACTORS = ['sandalias','guantes','chaleco'];
+    var roundIdx, worn;
+
+    function shuffle(arr){ return arr.map(function(v){return [Math.random(),v];}).sort(function(a,b){return a[0]-b[0];}).map(function(v){return v[1];}); }
+
+    function start(){ roundIdx = 0; nextRound(); }
+
+    function nextRound(){
+      if(roundIdx >= WEATHERS.length){ finishIsland('ropero', 3); return; }
+      worn = [];
+      draw();
+    }
+
+    function draw(){
+      var w = WEATHERS[roundIdx];
+      var pool = shuffle(w.need.concat(shuffle(DISTRACTORS).slice(0,2)));
+      var stage = document.getElementById('game-stage');
+      stage.innerHTML =
+        '<div class="weather-banner">'+w.label+'</div>' +
+        '<div class="avatar-zone dropzone" id="avatar-zone"><div class="worn-items" id="worn-items"></div><div class="avatar">🧍</div></div>' +
+        '<p style="color:var(--cream);text-align:center;font-weight:800;">Arrastra la ropa correcta hasta tu amigo.</p>' +
+        '<div class="closet" id="closet"></div>';
+      var closet = stage.querySelector('#closet');
+      pool.forEach(function(key){
+        var el = document.createElement('div');
+        el.className = 'cloth';
+        el.setAttribute('data-cloth', key);
+        el.textContent = CLOTHES[key] || '👚';
+        closet.appendChild(el);
+        makeDraggable(el, function(zone){
+          if(zone && zone.id==='avatar-zone'){ onDrop(key, el); }
+        });
+      });
+      setStatus((roundIdx+1)+' / '+WEATHERS.length);
+    }
+
+    function onDrop(key, el){
+      var w = WEATHERS[roundIdx];
+      if(w.need.indexOf(key) !== -1 && worn.indexOf(key)===-1){
+        worn.push(key);
+        var wi = document.getElementById('worn-items');
+        var span = document.createElement('span');
+        span.textContent = CLOTHES[key];
+        wi.appendChild(span);
+        el.style.visibility = 'hidden';
+        var rect = document.getElementById('avatar-zone').getBoundingClientRect();
+        celebrate(false, rect.left+rect.width/2, rect.top+30);
+        if(worn.length === w.need.length){
+          setTimeout(function(){ roundIdx++; nextRound(); }, 500);
+        }
+      } else {
+        el.classList.add('shake');
+        setTimeout(function(){ el.classList.remove('shake'); }, 350);
+      }
+    }
+
+    return {start:start};
+  })();
+
+  /* ================= GAME 3: CAJAS ================= */
+  var Cajas = (function(){
+    var CATEGORIES = [
+      {key:'animales', label:'Animales 🐾', items:['🐶','🐱','🐘','🐦']},
+      {key:'frutas', label:'Frutas 🍎', items:['🍌','🍇','🍊','🍓']},
+      {key:'vehiculos', label:'Vehículos 🚗', items:['🚗','🚌','✈️','🚲']}
+    ];
+    var placedCount, totalCount;
+
+    function shuffle(arr){ return arr.map(function(v){return [Math.random(),v];}).sort(function(a,b){return a[0]-b[0];}).map(function(v){return v[1];}); }
+
+    function start(){
+      placedCount = 0;
+      var allItems = [];
+      CATEGORIES.forEach(function(c){
+        c.items.forEach(function(emoji){ allItems.push({emoji:emoji, cat:c.key}); });
+      });
+      totalCount = allItems.length;
+      draw(shuffle(allItems));
+    }
+
+    function draw(items){
+      var stage = document.getElementById('game-stage');
+      stage.innerHTML =
+        '<p style="color:var(--cream);text-align:center;font-weight:800;">Arrastra cada cosa a su caja. Tómate tu tiempo.</p>' +
+        '<div class="boxes" id="boxes"></div>' +
+        '<p class="tray-title">Cosas para guardar</p>' +
+        '<div class="items-tray" id="tray"></div>';
+      var boxesEl = stage.querySelector('#boxes');
+      CATEGORIES.forEach(function(c){
+        var b = document.createElement('div');
+        b.className = 'box dropzone';
+        b.id = 'box-'+c.key;
+        b.setAttribute('data-cat', c.key);
+        b.innerHTML = '<span>'+c.label+'</span><div class="placed"></div>';
+        boxesEl.appendChild(b);
+      });
+      var tray = stage.querySelector('#tray');
+      items.forEach(function(it, idx){
+        var chip = document.createElement('div');
+        chip.className = 'item-chip';
+        chip.textContent = it.emoji;
+        chip.id = 'item-'+idx;
+        tray.appendChild(chip);
+        makeDraggable(chip, function(zone){
+          if(zone && zone.classList.contains('box')){
+            var cat = zone.getAttribute('data-cat');
+            if(cat === it.cat){
+              zone.querySelector('.placed').textContent += it.emoji + ' ';
+              chip.remove();
+              placedCount++;
+              var rect = zone.getBoundingClientRect();
+              celebrate(false, rect.left+rect.width/2, rect.top+20);
+              if(placedCount === totalCount){
+                setTimeout(function(){ finishIsland('cajas', 3); }, 500);
+              }
+            } else {
+              chip.classList.add('shake');
+              setTimeout(function(){ chip.classList.remove('shake'); }, 350);
+            }
+          }
+        });
+      });
+      setStatus(placedCount+' / '+totalCount);
+    }
+
+    return {start:start};
+  })();
+
+  /* ================= GAME 4: MEMORIA ================= */
+  var Memoria = (function(){
+    var SYMBOLS = ['🐶','🐱','🐰','🦊','🐼','🐸','🐵','🦁','🐷','🐔','🐧','🦋','🐝','🐢','🐳','🍎'];
+    var LEVELS = [4,6,8];
+    var levelIdx, cards, flipped, lockBoard, totalMismatches;
+
+    function shuffle(arr){ return arr.map(function(v){return [Math.random(),v];}).sort(function(a,b){return a[0]-b[0];}).map(function(v){return v[1];}); }
+
+    function start(){ levelIdx = 0; totalMismatches = 0; nextLevel(); }
+
+    function nextLevel(){
+      if(levelIdx >= LEVELS.length){
+        var stars = totalMismatches<=4 ? 3 : (totalMismatches<=9 ? 2 : 1);
+        finishIsland('memoria', stars);
+        return;
+      }
+      var pairs = LEVELS[levelIdx];
+      var symbols = shuffle(SYMBOLS).slice(0, pairs);
+      cards = shuffle(symbols.concat(symbols)).map(function(s){ return {symbol:s, flipped:false, matched:false}; });
+      flipped = [];
+      lockBoard = false;
+      draw();
+    }
+
+    function draw(){
+      var stage = document.getElementById('game-stage');
+      var cols = cards.length <= 8 ? 4 : (cards.length<=12?4:4);
+      stage.innerHTML =
+        '<p style="color:var(--cream);text-align:center;font-weight:800;">Nivel '+(levelIdx+1)+' — encuentra las parejas</p>' +
+        '<div class="mem-grid" id="mem-grid" style="grid-template-columns:repeat('+cols+',1fr);"></div>';
+      var grid = stage.querySelector('#mem-grid');
+      cards.forEach(function(c, idx){
+        var el = document.createElement('button');
+        el.className = 'mem-card';
+        el.setAttribute('data-action','mem-flip');
+        el.setAttribute('data-idx', idx);
+        el.textContent = '❔';
+        grid.appendChild(el);
+      });
+      setStatus('Nivel '+(levelIdx+1)+'/'+LEVELS.length);
+    }
+
+    function flip(el){
+      if(lockBoard) return;
+      var idx = parseInt(el.getAttribute('data-idx'),10);
+      var c = cards[idx];
+      if(c.flipped || c.matched) return;
+      c.flipped = true;
+      el.classList.add('flipped');
+      el.textContent = c.symbol;
+      flipped.push({idx:idx, el:el});
+      if(flipped.length===2){
+        lockBoard = true;
+        var a = flipped[0], b = flipped[1];
+        if(cards[a.idx].symbol === cards[b.idx].symbol){
+          cards[a.idx].matched = true; cards[b.idx].matched = true;
+          a.el.classList.add('matched'); b.el.classList.add('matched');
+          var rect = b.el.getBoundingClientRect();
+          celebrate(false, rect.left+rect.width/2, rect.top+rect.height/2);
+          flipped = [];
+          lockBoard = false;
+          if(cards.every(function(c){return c.matched;})){
+            setTimeout(function(){ levelIdx++; nextLevel(); }, 500);
+          }
+        } else {
+          totalMismatches++;
+          setTimeout(function(){
+            cards[a.idx].flipped = false; cards[b.idx].flipped = false;
+            a.el.classList.remove('flipped'); a.el.textContent='❔';
+            b.el.classList.remove('flipped'); b.el.textContent='❔';
+            flipped = [];
+            lockBoard = false;
+          }, 800);
+        }
+      }
+    }
+
+    return {start:start, flip:flip};
+  })();
+
+  /* ================= GAME 5: COCINA ================= */
+  var Cocina = (function(){
+    var RECIPES = [
+      {name:'Sándwich', steps:['🍞','🥬','🍅','🧀','🍞']},
+      {name:'Hamburguesa', steps:['🍞','🥩','🧀','🥬','🍞']},
+      {name:'Taco', steps:['🫓','🥩','🧅','🧀','🍅']},
+      {name:'Pizza', steps:['🫓','🍅','🧀','🍄']},
+      {name:'Perro caliente', steps:['🌭','🧅','🍅','🧀']}
+    ];
+    var DISTRACTORS = ['🥕','🍇','🍪','🥨','🍩','🥦'];
+    var recipeIdx, progressIdx, hearts;
+
+    function shuffle(arr){ return arr.map(function(v){return [Math.random(),v];}).sort(function(a,b){return a[0]-b[0];}).map(function(v){return v[1];}); }
+
+    function start(){ recipeIdx = 0; nextRecipe(); }
+
+    function nextRecipe(){
+      if(recipeIdx >= RECIPES.length){ finishIsland('cocina', 3); return; }
+      progressIdx = 0;
+      hearts = 3;
+      draw();
+    }
+
+    function draw(){
+      var r = RECIPES[recipeIdx];
+      var tray = shuffle(r.steps.concat(shuffle(DISTRACTORS).slice(0,3)));
+      var stage = document.getElementById('game-stage');
+      var slotsHtml = r.steps.map(function(s, i){
+        return '<div class="slot'+(i<progressIdx?' filled':'')+'">'+(i<progressIdx?s:'')+'</div>';
+      }).join('');
+      stage.innerHTML =
+        '<div class="plate"><strong>'+r.name+'</strong><div class="recipe-track">'+slotsHtml+'</div></div>' +
+        '<p class="tray-title">Toca los ingredientes en este orden</p>' +
+        '<div class="items-tray" id="tray"></div>';
+      var trayEl = stage.querySelector('#tray');
+      tray.forEach(function(emoji, idx){
+        var chip = document.createElement('button');
+        chip.className = 'item-chip';
+        chip.setAttribute('data-action','recipe-pick');
+        chip.setAttribute('data-emoji', emoji);
+        chip.setAttribute('data-idx', idx);
+        chip.textContent = emoji;
+        trayEl.appendChild(chip);
+      });
+      setStatus('<span class="hearts">'+heartsHtml()+'</span>');
+    }
+
+    function heartsHtml(){
+      var s = '';
+      for(var i=0;i<3;i++) s += (i<hearts ? '❤️' : '🤍');
+      return s;
+    }
+
+    function pick(el){
+      var r = RECIPES[recipeIdx];
+      var emoji = el.getAttribute('data-emoji');
+      var needed = r.steps[progressIdx];
+      if(emoji === needed){
+        progressIdx++;
+        el.remove();
+        var rect = document.getElementById('game-stage').getBoundingClientRect();
+        celebrate(false, rect.left+rect.width/2, rect.top+60);
+        draw();
+        if(progressIdx === r.steps.length){
+          setTimeout(function(){ recipeIdx++; nextRecipe(); }, 600);
+        }
+      } else {
+        hearts--;
+        el.classList.add('shake');
+        setTimeout(function(){ el.classList.remove('shake'); }, 350);
+        if(hearts<=0){
+          setTimeout(function(){
+            showToast('¡No te preocupes! Vuelve a intentarlo 💪');
+            progressIdx = 0; hearts = 3; draw();
+          }, 350);
+        } else {
+          setStatus('<span class="hearts">'+heartsHtml()+'</span>');
+        }
+      }
+    }
+
+    return {start:start, pick:pick};
+  })();
+
+  /* ================= INIT ================= */
+  render();
+})();
+</script>
+</body>
+</html>
